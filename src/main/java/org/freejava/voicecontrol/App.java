@@ -130,11 +130,7 @@ public class App
     }
 
     private static void loadJniLib(File newRoot) {
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.indexOf("mac") != -1)
-            System.load(new File(newRoot, "native/libpocketsphinx_jni.dylib").getAbsolutePath());
-        if (os.indexOf("linux") != -1)
-            System.load(new File(newRoot, "native/libpocketsphinx_jni.so").getAbsolutePath());
+        Library.loadLibrary(new File(newRoot, "native"), "pocketsphinx_jni");
     }
 
     private static File extract() throws IOException {
