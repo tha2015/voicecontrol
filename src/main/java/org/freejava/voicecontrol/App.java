@@ -2,7 +2,6 @@ package org.freejava.voicecontrol;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +21,8 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
+import org.freejava.voicecontrol.impl.CommandManagerImpl;
+import org.freejava.voicecontrol.impl.GoogleSpeechManagerImpl;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -34,7 +35,7 @@ import edu.cmu.pocketsphinx.Segment;
 
 public class App
 {
-    public static void main( String[] args ) throws IOException
+    public static void main( String[] args ) throws Exception
     {
         File newRoot = extract();
 
@@ -44,16 +45,14 @@ public class App
         System.out.println( "Hello World!" );
     }
 
-    public static void listen2(File newRoot) throws IOException {
+    public static void listen2(File newRoot) throws Exception {
         Config c = Decoder.defaultConfig();
         c.setString("-hmm", new File(newRoot, "model/en-us/en-us").getAbsolutePath());
         c.setString("-lm", new File(newRoot, "model/en-us/en-us.lm.bin").getAbsolutePath());
         c.setString("-dict", new File(newRoot, "model/en-us/cmudict-en-us.dict").getAbsolutePath());
         Decoder d = new Decoder(c);
 
-        FileInputStream ais = new FileInputStream(new File(newRoot, "test/data/goforward.raw"));
-
-        d.setKeyphrase("keyphrase_search", "washington");
+        d.setKeyphrase("keyphrase_search", "how are you");
         d.setSearch("keyphrase_search");
 
         TargetDataLine line = getAudioInputLine();
@@ -83,8 +82,12 @@ public class App
                 d.endUtt();
                 final Hypothesis hypothesis = d.hyp();
                 if (hypothesis != null) {
+
                     System.out.println(hypothesis.getHypstr());
-                    // process d.getRawdata()
+
+                    String text = new GoogleSpeechManagerImpl().transcript(d.getRawdata());
+                    new CommandManagerImpl().handleCommand(text);
+
                 }
                 d.startUtt();
 
