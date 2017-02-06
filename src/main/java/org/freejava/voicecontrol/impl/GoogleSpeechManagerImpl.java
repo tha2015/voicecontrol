@@ -20,7 +20,6 @@ public class GoogleSpeechManagerImpl implements ISpeechManager {
      */
     @Override
     public String transcript(short[] dataData) throws Exception {
-
         byte[] bytes = toLittleEndianByteArray(dataData);
 
         try (SpeechClient speech = SpeechClient.create()) {

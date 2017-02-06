@@ -37,22 +37,26 @@ public class App
 {
     public static void main( String[] args ) throws Exception
     {
+
         File newRoot = extract();
 
         loadJniLib(newRoot);
-        listen2(newRoot);
+
+        new App().listen(newRoot);
 
         System.out.println( "Hello World!" );
     }
 
-    public static void listen2(File newRoot) throws Exception {
+    private ICommandManager mgr = new CommandManagerImpl();
+
+    public void listen(File newRoot) throws Exception {
         Config c = Decoder.defaultConfig();
         c.setString("-hmm", new File(newRoot, "model/en-us/en-us").getAbsolutePath());
         c.setString("-lm", new File(newRoot, "model/en-us/en-us.lm.bin").getAbsolutePath());
         c.setString("-dict", new File(newRoot, "model/en-us/cmudict-en-us.dict").getAbsolutePath());
         Decoder d = new Decoder(c);
 
-        d.setKeyphrase("keyphrase_search", "how are you");
+        d.setKeyphrase("keyphrase_search", "lily");
         d.setSearch("keyphrase_search");
 
         TargetDataLine line = getAudioInputLine();
@@ -86,7 +90,7 @@ public class App
                     System.out.println(hypothesis.getHypstr());
 
                     String text = new GoogleSpeechManagerImpl().transcript(d.getRawdata());
-                    new CommandManagerImpl().handleCommand(text);
+                    mgr.handleCommand(text);
 
                 }
                 d.startUtt();
