@@ -3,6 +3,7 @@ package org.freejava.voicecontrol;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -56,7 +57,14 @@ public class App
         c.setString("-dict", new File(newRoot, "model/en-us/cmudict-en-us.dict").getAbsolutePath());
         Decoder d = new Decoder(c);
 
-        d.setKeyphrase("keyphrase_search", "lily");
+        File temp = File.createTempFile("tempfile", ".txt");
+        FileWriter fw = new FileWriter(temp);
+        for (String keyword : new String[] {"lily", "alex"}) {
+            fw.write(keyword + "\n");
+        }
+        fw.close();
+
+        d.setKws("keyphrase_search", temp.getAbsolutePath());
         d.setSearch("keyphrase_search");
 
         TargetDataLine line = getAudioInputLine();
@@ -86,10 +94,15 @@ public class App
                 d.endUtt();
                 final Hypothesis hypothesis = d.hyp();
                 if (hypothesis != null) {
+                    String hypstr = hypothesis.getHypstr();
 
-                    System.out.println(hypothesis.getHypstr());
+                    String languageCode = "en-US";
+                    if (hypstr.indexOf("lily") != -1) {
+                        languageCode = "vi-VN";
+                    }
+                    System.out.println(languageCode + ":" + hypstr );
 
-                    String text = new GoogleSpeechManagerImpl().transcript(d.getRawdata());
+                    String text = new GoogleSpeechManagerImpl().transcript(languageCode, d.getRawdata());
                     mgr.handleCommand(text);
 
                 }

@@ -19,7 +19,7 @@ public class GoogleSpeechManagerImpl implements ISpeechManager {
      * @see org.freejava.voicecontrol.ISpeechManager#transcript(short[])
      */
     @Override
-    public String transcript(short[] dataData) throws Exception {
+    public String transcript(String languageCode, short[] dataData) throws Exception {
         byte[] bytes = toLittleEndianByteArray(dataData);
 
         try (SpeechClient speech = SpeechClient.create()) {
@@ -28,7 +28,7 @@ public class GoogleSpeechManagerImpl implements ISpeechManager {
             ByteString audioBytes = ByteString.copyFrom(bytes);
 
             // Builds the sync recognize request
-            RecognitionConfig config = RecognitionConfig.newBuilder().setEncoding(AudioEncoding.LINEAR16).setSampleRate(16000).build();
+            RecognitionConfig config = RecognitionConfig.newBuilder().setEncoding(AudioEncoding.LINEAR16).setSampleRate(16000).setLanguageCode(languageCode).build();
             RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(audioBytes).build();
 
             // Performs speech recognition on the audio file
